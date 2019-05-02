@@ -1,0 +1,13 @@
+{
+  "name": "@twilson63/mock-fetch",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "devDependencies": {
+    "isomorphic-fetch": "^2.2.1",
+    "tape": "^4.10.1"
+  },
+  "scripts": {
+    "test": "tape test"
+  }
+}
