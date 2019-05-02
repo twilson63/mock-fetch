@@ -9,6 +9,8 @@ module.exports = Object.freeze({
   unMockFetch
 })
 
+let tests = []
+
 /**
  * mockFetch
  *
@@ -23,11 +25,20 @@ module.exports = Object.freeze({
  */
 function mockFetch(testUrl='', testMethod='GET', response={statusCode: 200, body: {ok: true}}) {
   const matches = isMatch(testUrl, testMethod)
+  tests.push({test: matches, response})
+
   fetch = (url, opts={method: 'GET'}) => {
-    if(matches(url, opts.method)) {
+    const match = tests.reduce((acc, t) => {
+      if (t.test(url, opts.method)) {
+        return t.response
+      }
+      return acc
+    }, null, tests)
+
+    if(match) {
       return Promise.resolve({
-        statusCode: response.statusCode,
-        json: () => response.body
+        status: match.status,
+        json: () => match.body
       })
     }
     return doFetch(url, opts)
@@ -48,8 +59,12 @@ function unMockFetch() {
 //
 function isMatch(a1, b1) {
   return function(a2, b2) {
-    return and(equals(a1,a2), equals(b1,b2))
+    return and(expMatch(a1,a2), equals(b1,b2))
   }
+}
+
+function expMatch(a,b) {
+  return new RegExp(a).test(b)
 }
 
 function and (a,b) {
