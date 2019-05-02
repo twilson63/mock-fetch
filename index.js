@@ -25,7 +25,7 @@ let tests = []
  */
 function mockFetch(testUrl='', testMethod='GET', response={statusCode: 200, body: {ok: true}}) {
   const matches = isMatch(testUrl, testMethod)
-  tests.push({test: matches, response})
+  tests = append({test: matches, response}, tests)
 
   fetch = (url, opts={method: 'GET'}) => {
     const match = tests.reduce((acc, t) => {
@@ -52,6 +52,7 @@ function mockFetch(testUrl='', testMethod='GET', response={statusCode: 200, body
  *
  */
 function unMockFetch() {
+  tests = []
   fetch = doFetch
 }
 
@@ -61,6 +62,10 @@ function isMatch(a1, b1) {
   return function(a2, b2) {
     return and(expMatch(a1,a2), equals(b1,b2))
   }
+}
+
+function append(value, array) {
+  return [...array, value]
 }
 
 function expMatch(a,b) {
