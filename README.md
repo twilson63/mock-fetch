@@ -5,28 +5,50 @@ mock out fetch requests and provide a defined response for integration testing.
 ## Example
 
 ```js
-require('isomorphic-fetch')
-const test = require('tape')
-const { mockFetch, unMockFetch } = require('../')
+import { test } from 'tape-modern'
+import { mfetch, clear } from './'
 
-test('mockFetch success', t => {
-  mockFetch('http://localhost:5984/', 'GET', { statusCode: 200, body: {ok: true}})
+const url = 'https://jsonplaceholder.typicode.com/todos'
 
-  fetch('http://localhost:5984/').then(res => {
-    t.equal(res.statusCode, 200)
-    return res.json()
-  })
-    .then(doc => t.deepEquals(doc, {ok: true}))
+test('post mfetch', async t => {
+  mfetch.post(url, { status: 201, body: {ok: true}})
 
-  unMockFetch()
-  t.end()
+  const result = await fetch(url, {
+    method: 'POST',
+    body: JSON.stringify({"name": "foo"}),
+    headers: {
+      'content-type': 'application/json'
+    }
+  }).then(res => res.json())
+
+  t.ok(result.ok)
+
+  clear()
 })
+
 ```
 
 ## Install
 
 ``` sh
 npm install --save-dev @twilson63/mock-fetch
+```
+
+## API
+
+* mfetch(url, method, resposne)
+* mfetch.post(url, response)
+* mfetch.put(url, response)
+* mfetch.delete(url, response) - watches for delete fetches that matches the url
+* clear() - clears mocks
+
+* response object contains a status and body property
+
+``` 
+{
+  status: 200,
+  body: { ok: true }
+}
 ```
 
 ## License

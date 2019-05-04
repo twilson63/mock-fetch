@@ -1,7 +1,3 @@
-'use strict';
-
-Object.defineProperty(exports, '__esModule', { value: true });
-
 if (!fetch) {
   throw new Error('fetch is not found! "npm install isomorphic-fetch"')
 }
@@ -96,5 +92,4 @@ function equals(a,b) {
   return a === b
 }
 
-exports.clear = clear;
-exports.mfetch = mfetch;
+export { clear, mfetch };
