@@ -15,6 +15,7 @@ let printLog = false
 function log() {
   printLog = !printLog
 }
+let tests = []
 
 /**
  * mockFetch
@@ -30,15 +31,24 @@ function log() {
  */
 function mockFetch(testUrl='', testMethod='GET', response={statusCode: 200, body: {ok: true}}) {
   const matches = isMatch(testUrl, testMethod)
+  tests = append({test: matches, response}, tests)
+
   fetch = (url, opts={method: 'GET'}) => {
     if (!opts.method) { opts.method = 'GET' }
     if (printLog) {
       console.log(opts.method + ' - ' + url)
     }
-    if(matches(url, opts.method)) {
+    const match = tests.reduce((acc, t) => {
+      if (t.test(url, opts.method)) {
+        return t.response
+      }
+      return acc
+    }, null, tests)
+
+    if(match) {
       return Promise.resolve({
-        statusCode: response.statusCode,
-        json: () => response.body
+        status: match.status,
+        json: () => match.body
       })
     }
     return doFetch(url, opts)
@@ -52,6 +62,7 @@ function mockFetch(testUrl='', testMethod='GET', response={statusCode: 200, body
  *
  */
 function unMockFetch() {
+  tests = []
   fetch = doFetch
 }
 
@@ -59,8 +70,16 @@ function unMockFetch() {
 //
 function isMatch(a1, b1) {
   return function(a2, b2) {
-    return and(equals(a1,a2), equals(b1,b2))
+    return and(expMatch(a1,a2), equals(b1,b2))
   }
+}
+
+function append(value, array) {
+  return [...array, value]
+}
+
+function expMatch(a,b) {
+  return new RegExp(a).test(b)
 }
 
 function and (a,b) {
