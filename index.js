@@ -6,8 +6,15 @@ const doFetch = fetch
 
 module.exports = Object.freeze({
   mockFetch,
-  unMockFetch
+  unMockFetch,
+  log
 })
+
+let printLog = false
+
+function log() {
+  printLog = !printLog
+}
 
 /**
  * mockFetch
@@ -24,6 +31,10 @@ module.exports = Object.freeze({
 function mockFetch(testUrl='', testMethod='GET', response={statusCode: 200, body: {ok: true}}) {
   const matches = isMatch(testUrl, testMethod)
   fetch = (url, opts={method: 'GET'}) => {
+    if (!opts.method) { opts.method = 'GET' }
+    if (printLog) {
+      console.log(opts.method + ' - ' + url)
+    }
     if(matches(url, opts.method)) {
       return Promise.resolve({
         statusCode: response.statusCode,
